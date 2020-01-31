@@ -6,15 +6,14 @@ import os
 import zlib
 import struct
 import itertools
-from google.protobuf.json_format import MessageToJson
 from os.path import dirname
 
 panda_dir = dirname(dirname(dirname(os.path.realpath(__file__))))
 
 # components of paths to be serched
-top_dirs = [panda_dir, dirname(panda_dir)]
-build_dirs = ['build-panda', 'build', 'opt-panda', 'debug-panda']
-arch_dirs = ['i386-softmmu', 'x86_64-softmmu']
+top_dirs = [panda_dir, dirname(panda_dir), '/home/mksavic/git/tdes/avatar2/targets/build/panda/']
+build_dirs = ['build-panda', 'build', 'opt-panda', 'debug-panda', 'panda']
+arch_dirs = ['i386-softmmu', 'x86_64-softmmu', 'arm-softmmu']
 searched_paths = []
 
 for dc in itertools.product(top_dirs, build_dirs, arch_dirs):
@@ -32,7 +31,7 @@ assert 'plog_pb2' in sys.modules, "Couldn't load module plog_pb2. Searched paths
 
 class PLogReader:
     def __init__(self, fn):
-        self.f = open(fn)
+        self.f = open(fn, 'rb')
         self.version, _, self.dir_pos, _, self.chunk_gsize = struct.unpack('<IIQII', self.f.read(24))
 
         self.f.seek(self.dir_pos)
@@ -53,7 +52,7 @@ class PLogReader:
         self.f.close()
         self.f = self.chunk_data = None
 
-    def next(self):
+    def __next__(self):
         # ran out of chunks
         if not self.chunk_idx < self.nchunks:
             raise StopIteration
@@ -99,5 +98,5 @@ if __name__ == "__main__":
     with PLogReader(sys.argv[1]) as plr:
         for i, m in enumerate(plr):
             if i > 0: print(',')
-            print(MessageToJson(m), end='')
+            print(m, end='')
     print('\n]')

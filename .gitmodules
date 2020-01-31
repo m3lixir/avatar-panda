@@ -34,3 +34,6 @@
 [submodule "roms/skiboot"]
 	path = roms/skiboot
 	url = git://git.qemu.org/skiboot.git
+[submodule "panda/plugins/io_taint"]
+	path = panda/plugins/io_taint
+	url = https://github.com/m3lixir/io_taint.git

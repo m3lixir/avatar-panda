@@ -236,6 +236,8 @@ static int get_dirname_len(const char * filename)
     return 0;
 }
 
+extern ram_addr_t ram_size;
+
 static void init_memory_area(QDict *mapping, const char *kernel_filename)
 {
     uint64_t size;
@@ -306,6 +308,10 @@ static void init_memory_area(QDict *mapping, const char *kernel_filename)
             data_size = get_file_size(filename);
         }
 
+        if (ram_size < address + size) {
+            ram_size = address + size;
+        }
+
         printf("Configurable: Inserting %"
                PRIx64 " bytes of data in memory region %s\n", data_size, name);
         //Size of data to put into a RAM region needs to fit in the RAM region
@@ -346,6 +352,16 @@ static void init_peripheral(QDict *device)
     qemu_name = qdict_get_str(device, "qemu_name");
     address = qdict_get_int(device, "address");
     name = qdict_get_str(device, "name");
+
+    char * pch;
+    pch = strchr(name, '_');
+    pch = strchr(pch + 1, '_');
+    pch = strchr(pch + 1, '_');
+    uint64_t size = strtoull(pch + 1, NULL, 16);
+
+    if (ram_size < size) {
+        ram_size = size;
+    }
 
     printf("Configurable: Adding peripheral[%s] region %s at address 0x%" PRIx64 "\n", 
             qemu_name, name, address);
